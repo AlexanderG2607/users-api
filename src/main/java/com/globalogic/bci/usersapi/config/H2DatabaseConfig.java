@@ -15,7 +15,6 @@ public class H2DatabaseConfig {
     public DataSourceInitializer dataSourceInitializer(DataSource dataSource) {
         ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
         databasePopulator.addScript(new ClassPathResource("schema.sql"));
-        //databasePopulator.addScript(new ClassPathResource("data.sql"));
 
         DataSourceInitializer dataSourceInitializer = new DataSourceInitializer();
         dataSourceInitializer.setDataSource(dataSource);
