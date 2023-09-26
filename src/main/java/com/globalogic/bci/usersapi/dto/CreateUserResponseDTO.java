@@ -4,13 +4,17 @@ package com.globalogic.bci.usersapi.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import lombok.Data;
+import lombok.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
+    "id",
     "name",
     "email",
     "password",
@@ -19,14 +23,21 @@ import java.util.UUID;
 public class CreateUserResponseDTO {
 
     @JsonProperty("id")
-    public UUID id;
+    private String id;
+
+    @JsonProperty("name")
+    private String name;
+    @JsonProperty("email")
+    private String email;
+    @JsonProperty("phones")
+    private List<PhoneDTO> phones;
     @JsonProperty("created")
-    public String created;
+    private String created;
     @JsonProperty("lastLogin")
-    public String lastLogin;
+    private String lastLogin;
     @JsonProperty("token")
-    public String token;
+    private String token;
     @JsonProperty("isActive")
-    public Boolean isActive;
+    private Boolean isActive;
 
 }
