@@ -1,4 +1,3 @@
-
 package com.globalogic.bci.usersapi.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -8,22 +7,24 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "number",
-    "citycode",
-    "countrycode"
+        "timestamp",
+        "code",
+        "detail"
 })
-public class PhoneDTO {
+public class ErrorDetailResponseDTO {
 
-    @JsonProperty("number")
-    private Long number;
-    @JsonProperty("citycode")
-    private Integer cityCode;
-    @JsonProperty("countrycode")
-    private String countryCode;
+    @JsonProperty("timestamp")
+    private Timestamp timestamp;
+    @JsonProperty("code")
+    private Integer code;
+    @JsonProperty("detail")
+    private String detail;
 
 }
