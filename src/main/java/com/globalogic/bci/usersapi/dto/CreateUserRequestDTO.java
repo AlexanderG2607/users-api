@@ -17,10 +17,10 @@ import java.util.List;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "name",
-    "email",
-    "password",
-    "phones"
+        "name",
+        "email",
+        "password",
+        "phones"
 })
 public class CreateUserRequestDTO {
 
@@ -29,12 +29,16 @@ public class CreateUserRequestDTO {
 
     @NotEmpty
     @Pattern(regexp = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@"
-            + "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$")
+            + "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$",
+            message = "El formato del email debe ser \"aaaaaaa@undominio.algo\"")
     @JsonProperty("email")
     private String email;
 
     @NotEmpty
-    @Pattern(regexp = "^(?=(?:[^A-Z]*[A-Z]){1})(?=(?:[^0-9]*[0-9]){2,})(?!.*[^a-zA-Z0-9]).{8,12}$")
+    @Pattern(regexp = "^(?=(?:[^A-Z]*[A-Z]){1})(?=(?:[^0-9]*[0-9]){2,})(?!.*[^a-zA-Z0-9]).{8,12}$",
+            message = "El password debe tener solo una Mayúscula y solamente dos números " +
+                    "(no necesariamente consecutivos), en combinación de letras minúsculas," +
+                    " largo máximo de 12 y mínimo 8. ")
     @JsonProperty("password")
     private String password;
 
