@@ -8,4 +8,5 @@ public interface UsersService {
 
     CreateUserResponseDTO signUp(@RequestBody CreateUserRequestDTO createUserRequestDTO);
 
+    CreateUserResponseDTO login(String token);
 }

@@ -3,6 +3,7 @@ package com.globalogic.bci.usersapi.controller.advice;
 import com.globalogic.bci.usersapi.dto.ErrorDetailResponseDTO;
 import com.globalogic.bci.usersapi.dto.ErrorResponseDTO;
 import com.globalogic.bci.usersapi.exception.UserAlreadyExistsException;
+import com.globalogic.bci.usersapi.exception.UserUnauthorizedException;
 import lombok.val;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +41,18 @@ public class UsersControllerAdvice {
                 Timestamp.valueOf(LocalDateTime.now()), 2, errorMessage)));
 
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(UserUnauthorizedException.class)
+    public ResponseEntity<ErrorResponseDTO> handleUserAlreadyExistsException(UserUnauthorizedException ex) {
+        String errorMessage = ex.getMessage();
+
+        // Puedes construir un DTO de error personalizado si lo deseas
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO();
+        errorResponse.setErrors(Arrays.asList(new ErrorDetailResponseDTO(
+                Timestamp.valueOf(LocalDateTime.now()), 2, errorMessage)));
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
 }

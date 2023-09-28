@@ -1,27 +1,38 @@
 package com.globalogic.bci.usersapi.utils;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import java.util.Date;
+import io.jsonwebtoken.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
+@Component
 public class TokenJWTUtils {
-    public static String generateToken(String email, String password) {
 
-        String secret = "N1tvNgv7NjTm8x36Nh7bw8AC9I86cTMuB8EV4JgK7pg";
+    @Autowired
+    private JwtBuilder jwtBuilder;
+
+    @Autowired
+    private static JwtParser jwtParser;
+
+    private static JwtBuilder _jwtBuilder;
+
+    public TokenJWTUtils(JwtBuilder jwtBuilder) {
+        this._jwtBuilder = jwtBuilder;
+    }
+
+    public static String generateToken(String email, String password) {
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", email);
         claims.put("password", password);
 
-        long exoiratioinTimeInMillies = System.currentTimeMillis() + 3600000; // 1 hora en milisegundos
+        return _jwtBuilder.setClaims(claims).compact();
+    }
 
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject("loginToken")
-                .setExpiration(new Date(exoiratioinTimeInMillies))
-                .signWith(SignatureAlgorithm.HS256, secret)
-                .compact();
+    public static Optional<Jws<Claims>> validateJWTToken(String token) {
+        return Optional.of(jwtParser.parseClaimsJws(token));
     }
 }
