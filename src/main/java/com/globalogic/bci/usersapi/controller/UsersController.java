@@ -5,6 +5,7 @@ import com.globalogic.bci.usersapi.dto.CreateUserResponseDTO;
 import com.globalogic.bci.usersapi.exception.UserUnauthorizedException;
 import com.globalogic.bci.usersapi.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -21,7 +22,7 @@ public class UsersController {
 
     @PostMapping(value = "/sign-up", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<CreateUserResponseDTO> signUp(@Validated @RequestBody CreateUserRequestDTO createUserRequestDTO) {
-        return ResponseEntity.ok(usersService.signUp(createUserRequestDTO));
+        return new ResponseEntity<>(usersService.signUp(createUserRequestDTO),HttpStatus.CREATED);
     }
 
     @GetMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)

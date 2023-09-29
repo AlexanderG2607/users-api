@@ -15,11 +15,14 @@ public class TokenJWTUtils {
     private JwtBuilder jwtBuilder;
 
     @Autowired
-    private static JwtParser jwtParser;
+    private JwtParser jwtParser;
+
+    private static JwtParser _jwtParser;
 
     private static JwtBuilder _jwtBuilder;
 
-    public TokenJWTUtils(JwtBuilder jwtBuilder) {
+    public TokenJWTUtils(JwtBuilder jwtBuilder, JwtParser jwtParser) {
+        this._jwtParser = jwtParser;
         this._jwtBuilder = jwtBuilder;
     }
 
@@ -33,6 +36,6 @@ public class TokenJWTUtils {
     }
 
     public static Optional<Jws<Claims>> validateJWTToken(String token) {
-        return Optional.of(jwtParser.parseClaimsJws(token));
+        return Optional.of(_jwtParser.parseClaimsJws(token));
     }
 }

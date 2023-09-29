@@ -26,8 +26,8 @@ public class Phone {
     @Column(name = "country_code")
     private String countryCode;
 
-    @ManyToOne
-    @JoinColumn(name = "id", insertable = false, updatable = false)
+    @ManyToOne()
+    @JoinColumn(name = "user_id")
     private User user;
 
 }

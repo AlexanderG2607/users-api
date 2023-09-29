@@ -30,13 +30,14 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'
 
+	implementation 'org.mindrot:jbcrypt:0.4'
+
 	runtimeOnly 'com.h2database:h2'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok','org.mapstruct:mapstruct-processor:1.5.5.Final'
 
 	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
-	//annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
