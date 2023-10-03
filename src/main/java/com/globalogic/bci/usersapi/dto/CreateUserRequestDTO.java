@@ -4,6 +4,7 @@ package com.globalogic.bci.usersapi.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.globalogic.bci.usersapi.utils.PasswordValidation;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,10 +36,11 @@ public class CreateUserRequestDTO {
     private String email;
 
     @NotEmpty
-    @Pattern(regexp = "^(?=(?:[^A-Z]*[A-Z]){1})(?=(?:[^0-9]*[0-9]){2,})(?!.*[^a-zA-Z0-9]).{8,12}$",
+    @Pattern(regexp = "^(?=^[^A-Z]*[A-Z][^A-Z])(?=^(?:[^\\d]*\\d){2}[^\\d])(?=.{8,12}).*$",
             message = "El password debe tener solo una Mayúscula y solamente dos números " +
                     "(no necesariamente consecutivos), en combinación de letras minúsculas," +
                     " largo máximo de 12 y mínimo 8. ")
+//    @PasswordValidation
     @JsonProperty("password")
     private String password;
 
