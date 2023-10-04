@@ -3,6 +3,7 @@ plugins {
 	id 'org.springframework.boot' version '2.7.16'
 	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 	id 'groovy'
+	id 'jacoco'
 }
 
 group = 'com.globalogic.bci'
@@ -49,14 +50,11 @@ dependencies {
 
 	implementation 'io.projectreactor:reactor-core:3.4.16'
 
+}
 
-//	implementation 'org.apache.groovy:groovy-all:4.0.15'
-//	testImplementation 'org.spockframework:spock-core:2.3-groovy-4.0'
-//
-//	testImplementation 'org.spockframework:spock-spring:2.3-groovy-4.0'
-
-
-
+jacocoTestReport {
+	reports.html
+	reports.xml
 }
 
 tasks.named('test') {

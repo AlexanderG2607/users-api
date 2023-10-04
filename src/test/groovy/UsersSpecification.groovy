@@ -11,7 +11,6 @@ import spock.lang.Specification
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.boot.test.context.SpringBootTest
-import java.util.Random
 
 @AutoConfigureMockMvc
 @SpringBootTest(classes= com.globalogic.bci.usersapi.UsersApiApplication.class)
@@ -29,7 +28,7 @@ class UsersSpecification extends Specification {
 
     def "should sign up a user successfully"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest(null)
+        CreateUserRequestDTO validRequest = createValidRequest([])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
@@ -198,7 +197,7 @@ class UsersSpecification extends Specification {
 
     def "password has 7 characters returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest([password: "a2asfG4", email: generarCorreoAleatorio()])
+        CreateUserRequestDTO validRequest = createValidRequest([password: "a2asfG4", email: generateRandomEmailAddress()])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
@@ -215,7 +214,7 @@ class UsersSpecification extends Specification {
 
     def "password has 13 characters returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest([password: "a2asfGfdfdf4a", email: generarCorreoAleatorio()])
+        CreateUserRequestDTO validRequest = createValidRequest([password: "a2asfGfdfdf4a", email: generateRandomEmailAddress()])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
@@ -232,7 +231,7 @@ class UsersSpecification extends Specification {
 
     def "password has no upperCase character returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest([password: "a2asfafdfdf4a", email: generarCorreoAleatorio()])
+        CreateUserRequestDTO validRequest = createValidRequest([password: "a2asfafdfdf4a", email: generateRandomEmailAddress()])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
@@ -249,7 +248,7 @@ class UsersSpecification extends Specification {
 
     def "password has more than one upperCase character returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest([password: "a2asfGfdfdF4", email: generarCorreoAleatorio()])
+        CreateUserRequestDTO validRequest = createValidRequest([password: "a2asfGfdfdF4", email: generateRandomEmailAddress()])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
@@ -266,7 +265,7 @@ class UsersSpecification extends Specification {
 
     def "password has more than one upperCase character returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest([password: "a2asfGfdfdF4", email: generarCorreoAleatorio()])
+        CreateUserRequestDTO validRequest = createValidRequest([password: "a2asfGfdfdF4", email: generateRandomEmailAddress()])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
@@ -283,7 +282,7 @@ class UsersSpecification extends Specification {
 
     def "password has no numbers in it returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest([password: "abasfGfdfdFh", email: generarCorreoAleatorio()])
+        CreateUserRequestDTO validRequest = createValidRequest([password: "abasfGfdfdFh", email: generateRandomEmailAddress()])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
@@ -300,7 +299,7 @@ class UsersSpecification extends Specification {
 
     def "password has more than 2 numbers in it returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest([password: "a2a5fGfdfdf4", email: generarCorreoAleatorio()])
+        CreateUserRequestDTO validRequest = createValidRequest([password: "a2a5fGfdfdf4", email: generateRandomEmailAddress()])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
@@ -327,18 +326,15 @@ class UsersSpecification extends Specification {
         new CreateUserRequestDTO(defaultRequest + overrides ?: [:])
     }
 
-    def generarCorreoAleatorio() {
-        def longitudNombre = 8 // Puedes ajustar la longitud del nombre del correo
+    def generateRandomEmailAddress() {
+        def longitudNombre = 8
         def caracteres = "abcdefghijklmnopqrstuvwxyz"
         def random = new Random()
 
-        // Genera una cadena aleatoria para el nombre del correo
         def nombreAleatorio = (0..<longitudNombre).collect { caracteres[random.nextInt(caracteres.length())] }.join()
 
-        // Elige un dominio de correo electrónico (puedes ajustar esto según tus necesidades)
         def dominio = "example.com"
 
-        // Combina el nombre aleatorio con el dominio para formar el correo electrónico completo
         return "${nombreAleatorio}@${dominio}"
     }
 

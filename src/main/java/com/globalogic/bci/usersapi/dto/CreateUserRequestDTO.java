@@ -36,11 +36,9 @@ public class CreateUserRequestDTO {
     private String email;
 
     @NotEmpty
-    @Pattern(regexp = "^(?=^[^A-Z]*[A-Z][^A-Z])(?=^(?:[^\\d]*\\d){2}[^\\d])(?=.{8,12}).*$",
-            message = "El password debe tener solo una Mayúscula y solamente dos números " +
+    @PasswordValidation(message = "El password debe tener solo una Mayúscula y solamente dos números " +
                     "(no necesariamente consecutivos), en combinación de letras minúsculas," +
                     " largo máximo de 12 y mínimo 8. ")
-//    @PasswordValidation
     @JsonProperty("password")
     private String password;
 
