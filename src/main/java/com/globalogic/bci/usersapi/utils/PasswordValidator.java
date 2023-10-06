@@ -2,8 +2,6 @@ package com.globalogic.bci.usersapi.utils;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class PasswordValidator implements ConstraintValidator<PasswordValidation, String> {
 
