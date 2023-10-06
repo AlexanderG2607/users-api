@@ -34,7 +34,6 @@ dependencies {
 
 	implementation 'org.mindrot:jbcrypt:0.4'
 	testImplementation 'junit:junit:4.13.1'
-	testImplementation 'junit:junit:4.13.1'
 
 	runtimeOnly 'com.h2database:h2'
 
