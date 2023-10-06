@@ -1,5 +1,6 @@
 package com.globalogic.bci.usersapi.utils;
 
+import com.globalogic.bci.usersapi.exception.InvalidTokenException;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,8 +23,8 @@ public class TokenJWTUtils {
     private static JwtBuilder _jwtBuilder;
 
     public TokenJWTUtils(JwtBuilder jwtBuilder, JwtParser jwtParser) {
-        this._jwtParser = jwtParser;
-        this._jwtBuilder = jwtBuilder;
+        _jwtParser = jwtParser;
+        _jwtBuilder = jwtBuilder;
     }
 
     public static String generateToken(String email, String password) {
@@ -35,7 +36,8 @@ public class TokenJWTUtils {
         return _jwtBuilder.setClaims(claims).compact();
     }
 
-    public static Optional<Jws<Claims>> validateJWTToken(String token) {
-        return Optional.of(_jwtParser.parseClaimsJws(token));
+    public static Jws<Claims> validateAndExtractJWTClaims(String token) {
+        return Optional.of(_jwtParser.parseClaimsJws(token))
+                .orElseThrow(() -> new InvalidTokenException("Token inválido"));
     }
 }

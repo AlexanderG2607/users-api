@@ -2,16 +2,18 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.globalogic.bci.usersapi.dto.CreateUserRequestDTO
 import com.globalogic.bci.usersapi.dto.CreateUserResponseDTO
 import com.globalogic.bci.usersapi.dto.ErrorResponseDTO
+import com.globalogic.bci.usersapi.utils.TokenJWTUtils
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.Jws
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import spock.lang.Specification
-import org.springframework.http.MediaType;
-import org.springframework.http.HttpStatus;
-import org.springframework.boot.test.context.SpringBootTest
-import java.util.Random
 
 @AutoConfigureMockMvc
 @SpringBootTest(classes= com.globalogic.bci.usersapi.UsersApiApplication.class)
@@ -27,9 +29,9 @@ class UsersSpecification extends Specification {
     def "Name"() {
     }
 
-    def "should sign up a user successfully"() {
+    def "given a valid request should sign up a user successfully returns 200 OK"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest(null)
+        CreateUserRequestDTO validRequest = createRequest([])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
@@ -42,26 +44,40 @@ class UsersSpecification extends Specification {
         def responseDTO = objectMapper.readValue(response.getContentAsString(), CreateUserResponseDTO.class)
         responseDTO.id != null
         responseDTO.created != null
-        responseDTO.token != null
-        responseDTO.isActive != null
+        responseDTO.isActive.booleanValue() == true
 
         if(Objects.nonNull(validRequest.name)){
-            responseDTO.name != null
+            responseDTO.name == "Alex"
         }
 
         responseDTO.email != null
-        responseDTO.phones.size() > 0
+        if(validRequest.phones.size() > 0){
+            def phones = responseDTO.phones
+            phones.size() > 0
+            phones.get(0).number == 11345666
+            phones.get(0).cityCode == 2
+            phones.get(0).number == "3"
+        }
+
+        responseDTO.token != null
+        def token = responseDTO.token
+
+        Jws<Claims> claimsJws = TokenJWTUtils.validateAndExtractJWTClaims(token);
+
+        claimsJws.getBody().containsKey("email")
+        claimsJws.getBody().get("email", String.class) == "lex.184.19r33se5s315@gmail.com"
+        claimsJws.getBody().containsKey("password")
     }
 
 
-    def "email has no '@' returns 400 BAD_REQUEST"() {
+    def "given an invalid request where email has no '@' returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest([email: "otro.emailexample.com"])
+        CreateUserRequestDTO invalidRequest = createRequest([email: "otro.emailexample.com"])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validRequest)))
+                .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andReturn().response
 
         then:
@@ -71,14 +87,14 @@ class UsersSpecification extends Specification {
         errorResponseDTO.errors.get(0).detail.contains("email")
     }
 
-    def "email has no domain has no '.' returns 400 BAD_REQUEST"() {
+    def "given an invalid request where email has no domain has no '.' returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest([email: "otro.email@examplecom"])
+        CreateUserRequestDTO invalidRequest = createRequest([email: "otro.email@examplecom"])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validRequest)))
+                .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andReturn().response
 
         then:
@@ -88,9 +104,9 @@ class UsersSpecification extends Specification {
         errorResponseDTO.errors.get(0).detail.contains("email")
     }
 
-    def "email not present returns 400 BAD_REQUEST"() {
+    def "given an invalid request where email not present returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = new CreateUserRequestDTO([
+        CreateUserRequestDTO invalidRequest = new CreateUserRequestDTO([
                 name: "Alex",
                 password: "a2asfGfdfdf4",
                 phones: [
@@ -101,7 +117,7 @@ class UsersSpecification extends Specification {
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validRequest)))
+                .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andReturn().response
 
         then:
@@ -111,14 +127,14 @@ class UsersSpecification extends Specification {
         errorResponseDTO.errors.get(0).detail.contains("email")
     }
 
-    def "email is null returns 400 BAD_REQUEST"() {
+    def "given an invalid request where email is null returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest([email: null])
+        CreateUserRequestDTO invalidRequest = createRequest([email: null])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validRequest)))
+                .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andReturn().response
 
         then:
@@ -128,14 +144,14 @@ class UsersSpecification extends Specification {
         errorResponseDTO.errors.get(0).detail.contains("email")
     }
 
-    def "email is empty returns 400 BAD_REQUEST"() {
+    def "given an invalid request where email is empty returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest([email: ""])
+        CreateUserRequestDTO invalidRequest = createRequest([email: ""])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validRequest)))
+                .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andReturn().response
 
         then:
@@ -145,14 +161,14 @@ class UsersSpecification extends Specification {
         errorResponseDTO.errors.get(0).detail.contains("email")
     }
 
-    def "email is blank returns 400 BAD_REQUEST"() {
+    def "given an invalid request where email is blank returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest([email: " "])
+        CreateUserRequestDTO invalidRequest = createRequest([email: " "])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validRequest)))
+                .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andReturn().response
 
         then:
@@ -162,14 +178,14 @@ class UsersSpecification extends Specification {
         errorResponseDTO.errors.get(0).detail.contains("email")
     }
 
-    def "email has special character returns 400 BAD_REQUEST"() {
+    def "given an invalid request where email has special character returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest([email: "lex.184.19r!&%33se5s315@gmail.com"])
+        CreateUserRequestDTO invalidRequest = createRequest([email: "lex.184.19r!&%33se5s315@gmail.com"])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validRequest)))
+                .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andReturn().response
 
         then:
@@ -179,31 +195,15 @@ class UsersSpecification extends Specification {
         errorResponseDTO.errors.get(0).detail.contains("email")
     }
 
-    def "email has special character returns 400 BAD_REQUEST"() {
+
+    def "given an invalid request where password has less than 8 characters returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest([email: "lex.184.19r!&%33se5s315@gmail.com"])
+        CreateUserRequestDTO invalidRequest = createRequest([password: "a2asfG4", email: generateRandomEmailAddress()])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validRequest)))
-                .andReturn().response
-
-        then:
-        response.status == HttpStatus.BAD_REQUEST.value()
-        def errorResponseDTO = objectMapper.readValue(response.getContentAsString(), ErrorResponseDTO.class)
-        errorResponseDTO.errors.size() > 0
-        errorResponseDTO.errors.get(0).detail.contains("email")
-    }
-
-    def "password has 7 characters returns 400 BAD_REQUEST"() {
-        given:
-        CreateUserRequestDTO validRequest = createValidRequest([password: "a2asfG4", email: generarCorreoAleatorio()])
-
-        when:
-        def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validRequest)))
+                .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andReturn().response
 
         then:
@@ -213,14 +213,14 @@ class UsersSpecification extends Specification {
         errorResponseDTO.errors.get(0).detail.contains("password")
     }
 
-    def "password has 13 characters returns 400 BAD_REQUEST"() {
+    def "given an invalid request where password has more than 12 characters returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest([password: "a2asfGfdfdf4a", email: generarCorreoAleatorio()])
+        CreateUserRequestDTO invalidRequest = createRequest([password: "a2asfGfdfdf4a", email: generateRandomEmailAddress()])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validRequest)))
+                .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andReturn().response
 
         then:
@@ -230,14 +230,14 @@ class UsersSpecification extends Specification {
         errorResponseDTO.errors.get(0).detail.contains("password")
     }
 
-    def "password has no upperCase character returns 400 BAD_REQUEST"() {
+    def "given an invalid request where password has no upperCase character returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest([password: "a2asfafdfdf4a", email: generarCorreoAleatorio()])
+        CreateUserRequestDTO invalidRequest = createRequest([password: "a2asfafdfdf4a", email: generateRandomEmailAddress()])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validRequest)))
+                .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andReturn().response
 
         then:
@@ -247,14 +247,32 @@ class UsersSpecification extends Specification {
         errorResponseDTO.errors.get(0).detail.contains("password")
     }
 
-    def "password has more than one upperCase character returns 400 BAD_REQUEST"() {
+    def "given an invalid request where password has more than one upperCase character returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest([password: "a2asfGfdfdF4", email: generarCorreoAleatorio()])
+        CreateUserRequestDTO invalidRequest = createRequest([password: "a2asfGfdfdF4", email: generateRandomEmailAddress()])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validRequest)))
+                .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andReturn().response
+
+        then:
+        response.status == HttpStatus.BAD_REQUEST.value()
+        def errorResponseDTO = objectMapper.readValue(response.getContentAsString(), ErrorResponseDTO.class)
+        errorResponseDTO.errors.size() > 0
+        errorResponseDTO.errors.get(0).detail.contains("password")
+    }
+    
+
+    def "given an invalid request where password has no numbers in it returns 400 BAD_REQUEST"() {
+        given:
+        CreateUserRequestDTO invalidRequest = createRequest([password: "abasfGfdfdFh", email: generateRandomEmailAddress()])
+
+        when:
+        def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andReturn().response
 
         then:
@@ -264,14 +282,14 @@ class UsersSpecification extends Specification {
         errorResponseDTO.errors.get(0).detail.contains("password")
     }
 
-    def "password has more than one upperCase character returns 400 BAD_REQUEST"() {
+    def "given an invalid request where  password has more than 2 numbers in it returns 400 BAD_REQUEST"() {
         given:
-        CreateUserRequestDTO validRequest = createValidRequest([password: "a2asfGfdfdF4", email: generarCorreoAleatorio()])
+        CreateUserRequestDTO invalidRequest = createRequest([password: "a2a5fGfdfdf4", email: generateRandomEmailAddress()])
 
         when:
         def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validRequest)))
+                .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andReturn().response
 
         then:
@@ -281,41 +299,7 @@ class UsersSpecification extends Specification {
         errorResponseDTO.errors.get(0).detail.contains("password")
     }
 
-    def "password has no numbers in it returns 400 BAD_REQUEST"() {
-        given:
-        CreateUserRequestDTO validRequest = createValidRequest([password: "abasfGfdfdFh", email: generarCorreoAleatorio()])
-
-        when:
-        def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validRequest)))
-                .andReturn().response
-
-        then:
-        response.status == HttpStatus.BAD_REQUEST.value()
-        def errorResponseDTO = objectMapper.readValue(response.getContentAsString(), ErrorResponseDTO.class)
-        errorResponseDTO.errors.size() > 0
-        errorResponseDTO.errors.get(0).detail.contains("password")
-    }
-
-    def "password has more than 2 numbers in it returns 400 BAD_REQUEST"() {
-        given:
-        CreateUserRequestDTO validRequest = createValidRequest([password: "a2a5fGfdfdf4", email: generarCorreoAleatorio()])
-
-        when:
-        def response = mockMvc.perform(MockMvcRequestBuilders.post("/users-api/sign-up")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validRequest)))
-                .andReturn().response
-
-        then:
-        response.status == HttpStatus.BAD_REQUEST.value()
-        def errorResponseDTO = objectMapper.readValue(response.getContentAsString(), ErrorResponseDTO.class)
-        errorResponseDTO.errors.size() > 0
-        errorResponseDTO.errors.get(0).detail.contains("password")
-    }
-
-    def createValidRequest(overrides) {
+    def createRequest(overrides) {
         def defaultRequest = [
                 name: "Alex",
                 email: "lex.184.19r33se5s315@gmail.com",
@@ -327,18 +311,15 @@ class UsersSpecification extends Specification {
         new CreateUserRequestDTO(defaultRequest + overrides ?: [:])
     }
 
-    def generarCorreoAleatorio() {
-        def longitudNombre = 8 // Puedes ajustar la longitud del nombre del correo
+    def generateRandomEmailAddress() {
+        def longitudNombre = 8
         def caracteres = "abcdefghijklmnopqrstuvwxyz"
         def random = new Random()
 
-        // Genera una cadena aleatoria para el nombre del correo
         def nombreAleatorio = (0..<longitudNombre).collect { caracteres[random.nextInt(caracteres.length())] }.join()
 
-        // Elige un dominio de correo electrónico (puedes ajustar esto según tus necesidades)
         def dominio = "example.com"
 
-        // Combina el nombre aleatorio con el dominio para formar el correo electrónico completo
         return "${nombreAleatorio}@${dominio}"
     }
 
